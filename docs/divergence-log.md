@@ -68,6 +68,28 @@
 | `el-dropdown/el-dropdown-menu/el-dropdown-item` | 自绘 `.chat-menu`(Transition + 点外收起) | 库不依赖 Element Plus;command 语义不变('traces'/'clear'),disabled 条件逐字保留 |
 | 其余模板(props/emits/指示灯/图标)与样式 | ruoyi 逐字 | 保真移植,仅 scss `@use` 指向包内 tokens |
 
-## Task 5:SessionSidebar
+## Task 5:SessionSidebar(desktop 1289 行 基座 + extension 1498 行)
 
-(见下方 Task 5 小节,合并后补记)
+> 三方 diff 共 1225 行;extension 整体是抽屉式布局(drawer mask/is-open/atmosphere/header 空态等),决策表只要求合入「项目菜单弹层」与桌面入口 prop 化,布局差异不并入。
+
+| 差异点 | 采用侧 | 理由 |
+| --- | --- | --- |
+| 项目菜单弹层:inline 绝对定位菜单(基座)vs extension 的 Teleport 到 body + fixed + getBoundingClientRect 视口夹紧(toggleProjectMenu/activeProject/projectMenuStyle/closeProjectMenu) | extension | 决策表指定合入;侧栏底部的项目行不再把菜单挤出屏幕。emit 的项目对象与基座同引用(props.projects.find),edit-project/delete-project 语义不变 |
+| 弹层随行关闭:Escape(onShortcut 分支)/resize/scroll 捕获监听/collapsed watch | extension | 弹层配套行为,一并合入(fixed 弹层不随侧栏滚动,必须监听关闭) |
+| `sidebar__project-more.is-open` 激活态样式 + `.sidebar__project-menu` fixed 样式(152px/12px 圆角/32px 行高) | extension | 随弹层替换基座的 absolute 菜单样式(136px/10px/30px) |
+| 桌面入口区块:rail 上 文件/知识库/资源库/偏好设置 四钮 + divider、展开态 `sidebar__nav` 三钮、用户菜单「设置」组及其分隔线 | desktop,**prop `showAppEntries` 控制,默认 true** | 决策表:桌面入口区块 prop 化;extension/ruoyi 传 false。四个 emit 声明保留(emit 定义无害),UI 随区块隐藏;语言/帮助/退出组非桌面入口,保留 |
+| 抽屉式布局(mask/atmosphere orbs/AGENTHUB eyebrow/会话计数/新对话按钮文案/空态图标/底部退出卡片/会话条目 meta 行) | desktop(不并入) | 决策表为「接口级分叉」,仅两项合入;抽屉形态属插件宿主布局 |
+| `isProjectExpanded(id)`(Number 归一)vs 基座 `expandedProjectIds.includes(p.projectId)` | desktop | 非决策表合入项,保留基座;归一化差异未观察到实际类型问题 |
+| 项目会话条目 div+删除钮(extension)vs button(基座) | desktop | 同上 |
+| `logoMark from '../assets/agenthub-logo-mark.svg'` | desktop,资产入包 | 复制 `desktop/src/assets/agenthub-logo-mark.svg` → 包内 `src/assets/`,import 路径不变 |
+| `toast from '../utils/confirm'` | 包内改造 | 指向 `../composables/useConfirm.js`(同 API 模块级单例) |
+| `avatarBase = import.meta.env.VITE_APP_BASE_API \|\| '/dev-api'`(desktop/extension 同) | 包内改造 | 库不读宿主 env;改走 uiBridge `getUiBridge()?.baseURL \|\| '/dev-api'`(宿主装配时按同一变量注入,行为等价) |
+| scss `@use` 路径 | 包内改造 | `../../tokens/ai-tokens.scss` |
+
+### 入包顺带的既有构建阻塞修复(非本任务分叉,登记备查)
+
+| 文件 | 问题 | 处理 |
+| --- | --- | --- |
+| src/components/WorkspaceDrawer.vue / WorkspacePreviewModal.vue(1bbf578 提交) | `@use '../chat-ui/ai-tokens.scss'` 路径不存在(tokens 实际在 `src/tokens/`),barrel 齐后即构建失败 | 机械修正为 `'../tokens/ai-tokens.scss'` |
+| src/index.js / src/index.d.ts(Task 6 barrel,并行工作区改动) | 导出了不存在的 `useStepDisplay`(实为 `useStepToggle`)与不存在的 `useConfirm` | 对齐模块真实导出面:`useStepToggle`;删除幻影 `useConfirm` 导出 |
+

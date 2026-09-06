@@ -184,7 +184,7 @@ async function onDownload() {
 </script>
 
 <style scoped lang="scss">
-@use '../chat-ui/ai-tokens.scss' as *;
+@use '../tokens/ai-tokens.scss' as *;
 
 .ws-preview-mask {
   position: fixed;
