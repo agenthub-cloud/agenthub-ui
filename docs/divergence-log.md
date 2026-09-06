@@ -34,7 +34,7 @@
 | `placement` prop('up' 默认/'down') | extension | 布局适配类转 prop;desktop 场景不传即 'up' |
 | popper z-index 70 → 2147483000 | extension | Teleport 到 body 后必须抬层级,随定位方案一并采用 |
 | 峰值行:`peakUsed/peakPercent/peakPercentDisplay/showPeak/peakTitle` + `__peak` 模板与样式 | ruoyi | 决策表:数据增强类合入。漏传 peakUsed 时回落 used,desktop 数据不受影响 |
-| 会话消耗堆叠条:`spend/spendAgents`(supervisor 中性灰/子智能体彩色/超 4 行折叠「其他 N 个」/rest 色)、`spendPrompt/spendCompletion/spendCalls`、`__spend*` 模板与样式 | ruoyi | 数据增强类合入。**后端未回 spend.agents 时回退 desktop 的两行摘要(本会话总 Token + Token 命中率)**——旧口径数据在合并版上渲染与 desktop 完全一致,不因增强而丢信息 |
+| 会话消耗堆叠条:`spend/spendAgents`(supervisor 中性灰/子智能体彩色/超 4 行折叠「其他 N 个」/rest 色)、`spendPrompt/spendCompletion/spendCalls`、`__spend*` 模板与样式 | ruoyi | 数据增强类合入。`detailMode='full'`(默认)展示完整明细；客户端显式传 `summary` 固定恢复 desktop 的两行摘要(本会话总 Token + Token 命中率)。不能再靠 `spend.agents` 缺失隐式回退，因为三端后端现已统一返回增强字段。 |
 | 指标行:`metrics` 通用透传 + `formatMetric`(percent/tokens 单位)+ `__metrics*` 样式 | ruoyi | 数据增强类合入;渲染条件 `spendAgents.length && metrics.length` —— 与会话消耗同代的增强口径一起出现,避免旧口径下与回退摘要重复展示 cacheHitRate |
 | `budget` 兜底:desktop `Number.isFinite(b) && b > 0 ? b : 128000` vs ruoyi `Number(budget \|\| 0)` | desktop | ruoyi 版在 budget 缺失时 percent 变 0,desktop 兜底更稳;保留基准行为 |
 | 环图底轨 `stroke="var(--ai-fill-4)"` vs ruoyi 的 `var(--ai-fill-4, #E5E5EA)` 等三处 fallback | desktop 主体 | 包内 `.ah-scope` 必加载 tokens,fallback 非必需;新增的 `__peak/__spend*/__metrics` 样式块按 ruoyi 逐字保留其 fallback(纯冗余,无害) |

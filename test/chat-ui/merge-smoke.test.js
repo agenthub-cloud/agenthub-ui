@@ -54,7 +54,16 @@ describe('chat-ui 分叉合并冒烟(阶段 2 Task 4)', () => {
     const enhanced = mount(ContextMeter, { props: { usage, attachTo: document.body } })
     await enhanced.find('.ctx-meter').trigger('click')
     expect(document.querySelectorAll('.ctx-meter-popper').length).toBeGreaterThan(0)
+    expect(document.body.textContent).toContain('会话消耗')
     enhanced.unmount()
+
+    // 客户端即使拿到增强字段也固定保持原有摘要，不再依赖字段缺失来隐式回退。
+    const summary = mount(ContextMeter, { props: { usage, detailMode: 'summary', attachTo: document.body } })
+    await summary.find('.ctx-meter').trigger('click')
+    expect(document.body.textContent).toContain('本会话总 Token')
+    expect(document.body.textContent).not.toContain('会话消耗')
+    expect(document.body.textContent).not.toContain('主智能体 ·')
+    summary.unmount()
 
     // 旧口径:无 agents 明细,回退 desktop 摘要行
     const legacy = mount(ContextMeter, { props: { usage: { ...usage, spend: { totalTokens: 90000 } }, attachTo: document.body } })

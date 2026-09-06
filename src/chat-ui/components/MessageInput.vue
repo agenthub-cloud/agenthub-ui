@@ -228,7 +228,12 @@
           </div>
 
           <!-- 6. 上下文容量与压缩指示环 (仅在有会话聊天时显示) -->
-          <ContextMeter v-if="showMeter && contextUsage" class="chat-input__meter" :usage="contextUsage" />
+          <ContextMeter
+            v-if="showMeter && contextUsage"
+            class="chat-input__meter"
+            :usage="contextUsage"
+            :detail-mode="contextMeterDetailMode"
+          />
         </div>
 
         <!-- 右侧状态与操作组 (胶囊模型选择 + 语音波纹/发送按钮) -->
@@ -341,6 +346,12 @@ const props = defineProps({
   kbs: { type: Array, default: null },
   kbLoading: { type: Boolean, default: false },
   showMeter: { type: Boolean, default: false },
+  // 后台保留 full 明细；desktop/extension 显式传 summary，避免根据后端字段猜宿主。
+  contextMeterDetailMode: {
+    type: String,
+    default: 'full',
+    validator: value => ['full', 'summary'].includes(value)
+  },
   // 默认按在线算:漏传时宁可少报一次断线,也不要凭空吓人。取值见 @agenthub-cloud/chat 传输层的连接状态广播。
   connectionState: { type: String, default: 'open' },
   // 紧凑变体(extension 侧栏场景):隐藏技能/知识库选择器,压缩间距;desktop 全尺寸场景不传即可

@@ -72,7 +72,7 @@
       </ul>
 
       <!-- 轮内峰值:持久化上下文很空时,仍能看到本会话曾经多挤(ruoyi 分叉并入,design §3.3) -->
-      <div v-if="showPeak" class="ctx-panel__peak" :title="peakTitle">
+      <div v-if="showEnhancedDetails && showPeak" class="ctx-panel__peak" :title="peakTitle">
         主智能体历史峰值 {{ formatK(peakUsed) }}（{{ peakPercentDisplay }}%）
       </div>
 
@@ -82,7 +82,7 @@
         用堆叠条而不是第二个环:环形自带"容量上限"暗示,而消耗没有上限。
         后端未回 agents 明细时(旧口径)回退到 desktop 的两行摘要。
       -->
-      <div v-if="spendAgents.length" class="ctx-panel__spend">
+      <div v-if="showEnhancedDetails && spendAgents.length" class="ctx-panel__spend">
         <div class="ctx-panel__spend-head">
           <span class="ctx-panel__spend-title">会话消耗</span>
           <span class="ctx-panel__spend-total">{{ formatK(spendTotal) }}</span>
@@ -130,7 +130,7 @@
       </div>
 
       <!-- 指标行(ruoyi 分叉并入):与 spend 明细同代的增强口径,旧口径不渲染避免与摘要重复 -->
-      <div v-if="spendAgents.length && metrics.length" class="ctx-panel__metrics">
+      <div v-if="showEnhancedDetails && spendAgents.length && metrics.length" class="ctx-panel__metrics">
         <div
           v-for="(m, i) in metrics"
           :key="m.key + '-' + i"
@@ -216,8 +216,16 @@ const props = defineProps({
   /** { used, budget, threshold, percent, segments, metrics, peakUsed, peakPercent, spend: { totalTokens, promptTokens, completionTokens, callCount, agents }, ... } */
   usage: { type: Object, default: null },
   /** 弹层方向: up 向上展开(输入条下方), down 向下展开(顶栏按钮) */
-  placement: { type: String, default: 'up' }
+  placement: { type: String, default: 'up' },
+  /** full=后台增强明细；summary=客户端原有的两行会话摘要 */
+  detailMode: {
+    type: String,
+    default: 'full',
+    validator: value => ['full', 'summary'].includes(value)
+  }
 })
+
+const showEnhancedDetails = computed(() => props.detailMode === 'full')
 
 const hasData = computed(() => !!props.usage && props.usage.budget > 0)
 
