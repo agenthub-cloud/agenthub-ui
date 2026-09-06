@@ -22,9 +22,9 @@
     "**/*.scss"
   ],
   "scripts": {
-    "dev": "vite",
+    "dev": "vite playground",
     "build": "vite build && npm run build:css",
-    "build:css": "sass src/tokens/ah-scope.scss dist/theme.css --no-source-map",
+    "build:css": "sass src/tokens/ah-scope.scss dist/theme.css --no-source-map && mkdir -p dist/tokens && cp src/tokens/ai-tokens.scss dist/tokens/",
     "test": "vitest run",
     "typecheck": "vue-tsc --noEmit",
     "prepublishOnly": "npm run test && npm run build"
