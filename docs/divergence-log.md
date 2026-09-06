@@ -93,3 +93,8 @@
 | src/components/WorkspaceDrawer.vue / WorkspacePreviewModal.vue(1bbf578 提交) | `@use '../chat-ui/ai-tokens.scss'` 路径不存在(tokens 实际在 `src/tokens/`),barrel 齐后即构建失败 | 机械修正为 `'../tokens/ai-tokens.scss'` |
 | src/index.js / src/index.d.ts(Task 6 barrel,并行工作区改动) | 导出了不存在的 `useStepDisplay`(实为 `useStepToggle`)与不存在的 `useConfirm` | 对齐模块真实导出面:`useStepToggle`;删除幻影 `useConfirm` 导出 |
 
+
+## 阶段 5 MessageInput ruoyi 超集
+
+- agents/agentId props + change-agent 事件:选择器照 skills 模式;不传 agents 整块隐藏(desktop/extension 零影响);类名用 chat-agent-pick 避开既有模型胶囊的 agent-pick。
+- kbs/kbLoading props + change-kbs 事件:双归属——传 kbs 数组=页面持有清单(ruoyi),不传=内部经 uiBridge kb.listOptions 拉取(desktop/extension);toggleKb 在页面模式下双发 change-kb+change-kbs。

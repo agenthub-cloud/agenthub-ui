@@ -49,6 +49,13 @@
         </div>
       </div>
 
+      <div v-if="!compact && selectedAgent" class="chat-skill-chips">
+        <span class="chat-skill-chip">
+          <span>🤖 {{ selectedAgent.agentName || selectedAgent.name || '智能体' }}</span>
+          <button type="button" :disabled="streaming" title="取消指定智能体" @click="clearAgent()">×</button>
+        </span>
+      </div>
+
       <div v-if="!compact && selectedSkills.length" class="chat-skill-chips">
         <span v-for="skill in selectedSkills" :key="skill.skillId" class="chat-skill-chip">
           <span>@{{ skill.skillName }}</span>
@@ -84,6 +91,42 @@
           >
             <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 3.5v9M3.5 8h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           </button>
+
+          <!-- 1.5 智能体选择(ruoyi 超集):agents 传入时显示 -->
+          <div v-if="!compact && agents && agents.length" class="tool-btn skill-pick chat-agent-pick" :class="{ 'is-open': agentPickerOpen, 'is-active': selectedAgent }" ref="agentPickerRef">
+            <button
+              type="button"
+              class="tool-btn__trigger"
+              :class="{ 'is-active': selectedAgent }"
+              :disabled="streaming"
+              :title="selectedAgent ? `本轮由 ${selectedAgent.agentName || selectedAgent.name} 回答` : '选择回答本轮的智能体'"
+              @click="agentPickerOpen = !agentPickerOpen"
+            >
+              <svg class="tool-btn__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="12" rx="2.5"/><path d="M12 7V4M8 4h8"/><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"/></svg>
+              <span class="tool-btn__text">{{ selectedAgent ? (selectedAgent.agentName || selectedAgent.name) : '智能体' }}</span>
+              <svg class="tool-btn__chev" width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div v-if="agentPickerOpen" class="skill-pick__menu">
+              <div class="skill-pick__head"><span>选择回答本轮的智能体</span><span class="skill-pick__tip">可随时切换</span></div>
+              <div v-if="!(agents && agents.length)" class="skill-pick__empty">没有可选的智能体</div>
+              <div v-else class="skill-pick__list">
+                <button
+                  v-for="a in agents"
+                  :key="a.agentId"
+                  type="button"
+                  class="skill-pick__item"
+                  :class="{ 'is-on': selectedAgent && Number(selectedAgent.agentId) === Number(a.agentId) }"
+                  @click="pickAgent(a)"
+                >
+                  <span class="skill-pick__item-copy">
+                    <strong>{{ a.agentName || a.name }}</strong>
+                    <small>{{ a.description || a.category || '智能体' }}</small>
+                  </span>
+                  <span v-if="selectedAgent && Number(selectedAgent.agentId) === Number(a.agentId)" class="skill-pick__check">✓</span>
+                </button>
+              </div>
+            </div>
+          </div>
 
           <!-- 2. @ 技能：只展示当前用户自己的技能 -->
           <div v-if="!compact" class="tool-btn skill-pick" :class="{ 'is-open': skillPickerOpen, 'is-active': selectedSkills.length }" ref="skillPickerRef">
@@ -144,12 +187,12 @@
             </button>
             <div v-if="kbPickerOpen" class="kb-pick__menu">
               <div class="kb-pick__head">知识库</div>
-              <div v-if="kbLoading" class="kb-pick__loading">加载中…</div>
-              <template v-else-if="kbs.length">
+              <div v-if="displayKbLoading" class="kb-pick__loading">加载中…</div>
+              <template v-else-if="displayKbs.length">
                 <p v-if="!compact" class="kb-pick__tip">勾选后智能体将优先检索指定知识库中的文档资产</p>
                 <div class="kb-pick__list">
                   <button
-                    v-for="k in kbs"
+                    v-for="k in displayKbs"
                     :key="k.kbId"
                     type="button"
                     class="kb-pick__item"
@@ -286,11 +329,17 @@ const props = defineProps({
   modelId: { type: [Number, String], default: null },
   skills: { type: Array, default: () => [] },
   skillIds: { type: Array, default: () => [] },
+  // ruoyi 超集:agents 传入时显示智能体选择器(desktop/extension 不传即隐藏)
+  agents: { type: Array, default: () => [] },
+  agentId: { type: [Number, String], default: null },
   sessionReady: { type: Boolean, default: true },
   canSend: { type: Boolean, default: true },
   sessionId: { type: [String, Number], default: null },
   contextUsage: { type: Object, default: null },
   initialKbIds: { type: Array, default: () => [] },
+  // kbs 双归属:传数组=页面持有清单(ruoyi 模式,事件 change-kbs);null/不传=内部经桥拉(桌面/插件模式,事件 change-kb)
+  kbs: { type: Array, default: null },
+  kbLoading: { type: Boolean, default: false },
   showMeter: { type: Boolean, default: false },
   // 默认按在线算:漏传时宁可少报一次断线,也不要凭空吓人。取值见 @agenthub-cloud/chat 传输层的连接状态广播。
   connectionState: { type: String, default: 'open' },
@@ -313,6 +362,8 @@ const emit = defineEmits([
   'change-model',
   'change-skills',
   'change-kb',
+  'change-agent',
+  'change-kbs',
   'upload',
   'manage-kb'
 ])
@@ -334,6 +385,23 @@ function chooseModel(modelId) {
   emit('change-model', modelId)
   pickerOpen.value = false
   focusInput()
+}
+
+/* ---- 智能体选择(ruoyi 超集):agents 传入时显示选择器,desktop/extension 不传即隐藏 ---- */
+const agentPickerRef = ref(null)
+const agentPickerOpen = ref(false)
+const selectedAgent = computed(() =>
+  (props.agents || []).find(a => Number(a.agentId) === Number(props.agentId)) || null
+)
+function pickAgent(agent) {
+  if (!agent?.agentId || props.streaming) return
+  emit('change-agent', agent.agentId)
+  agentPickerOpen.value = false
+  focusInput()
+}
+function clearAgent() {
+  if (props.streaming) return
+  emit('change-agent', null)
 }
 
 /* ---- @ 技能选择；公共目录技能添加到“我的”后才能出现在这里 ---- */
@@ -390,12 +458,16 @@ const kbPickerOpen = ref(false)
 const kbs = ref([])
 const kbLoading = ref(false)
 const kbIds = ref([])
+// 双归属展示:页面持有清单(props.kbs)优先,否则用内部拉取的 kbs
+const displayKbs = computed(() => (Array.isArray(props.kbs) ? props.kbs : kbs.value))
+const displayKbLoading = computed(() => (Array.isArray(props.kbs) ? props.kbLoading : kbLoading.value))
 
 watch(() => props.initialKbIds, (arr) => {
   if (Array.isArray(arr)) kbIds.value = [...arr]
 }, { immediate: true })
 
 async function loadKbs() {
+  if (Array.isArray(props.kbs)) return // 页面持有清单,无需内部拉取
   if (kbs.value.length || kbLoading.value) return
   kbLoading.value = true
   try {
@@ -421,6 +493,8 @@ function toggleKb(k) {
     kbIds.value.push(id)
   }
   emit('change-kb', [...kbIds.value])
+  // ruoyi 模式下同时发复数事件,页面按 change-kbs 接
+  if (Array.isArray(props.kbs)) emit('change-kbs', [...kbIds.value])
 }
 
 function openManageKb() {
