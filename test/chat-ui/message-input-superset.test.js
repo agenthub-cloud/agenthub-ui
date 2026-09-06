@@ -18,7 +18,7 @@ describe('MessageInput ruoyi 超集', () => {
   it('传 agents 渲染选择器,点击项发 change-agent', async () => {
     const w = mount(MessageInput, { props: { models: [], agents } })
     expect(w.find('.chat-agent-pick').exists()).toBe(true)
-    await w.find('.agent-pick .tool-btn__trigger').trigger('click')
+    await w.find('.chat-agent-pick .tool-btn__trigger').trigger('click')
     const items = w.findAll('.skill-pick__item')
     expect(items.length).toBe(2)
     await items[0].trigger('click')
