@@ -1,6 +1,7 @@
 /** playground 入口:演示宿主装配模式(theme + uiBridge)并挂载原子展示页。 */
 import { createApp } from 'vue'
 import App from './App.vue'
+import '../src/tokens/ah-scope.scss' // .ah-scope 变量与设计系统(playground 无宿主全局样式,需自行引入)
 import { configureUiBridge, useTheme } from '../src/index.js'
 
 // 宿主装配示例:playground 里全是演示桩;真实宿主(desktop/extension/ruoyi-ui)

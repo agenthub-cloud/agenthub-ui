@@ -67,7 +67,7 @@ async function onDangerDemo() {
 </script>
 
 <template>
-  <div class="pg">
+  <div class="pg ah-scope">
     <header class="pg-bar">
       <strong>@agenthub-cloud/ui playground</strong>
       <nav>
@@ -78,7 +78,7 @@ async function onDangerDemo() {
       <button @click="theme.toggleTheme()">主题:{{ theme.mode.value }}(当前{{ theme.isDark.value ? '暗' : '亮' }})</button>
     </header>
 
-    <main class="ah-scope pg-body">
+    <main class="pg-body">
       <section v-if="page === 'chat'" class="pg-chat">
         <ChatTimeline :user-messages="userMessages" :active-message-id="1" @jump="id => console.log('jump', id)" />
         <div class="pg-turns">
