@@ -6,3 +6,5 @@ const b = () => getUiBridge()?.kb
 export const getKbDocPreview = (...a) => b()?.getDocPreview(...a)
 export const downloadKbDocument = (...a) => b()?.downloadDocument(...a)
 export const listKbDoc = (...a) => b()?.listDoc(...a)
+/** 聊天输入框知识库选择器的选项来源(GET /ai/kb/options),宿主按各自路由实现。 */
+export const listKbOptions = (...a) => b()?.listOptions(...a)

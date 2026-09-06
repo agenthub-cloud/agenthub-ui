@@ -15,7 +15,7 @@
  *     getSkills: () => skillsArray                     // ChatMessage 技能 chip(响应式 getter)
  *     workspace: { deleteFile, downloadBlob, getFile, downloadUrl, clear, downloadZipBlob, getTree, upload }
  *     userFile:  { saveFromWorkspace }                 // WorkspaceDrawer「存回个人文件」
- *     kb:        { getDocPreview, downloadDocument, listDoc }  // CitationPreviewDialog 知识库预览
+ *     kb:        { getDocPreview, downloadDocument, listDoc, listOptions }  // CitationPreviewDialog 预览;listOptions 供 MessageInput 知识库选择器
  *   })
  *
  * 未配置时:富媒体加载与查看全文入口安静降级(不抛错、不打断渲染)。
