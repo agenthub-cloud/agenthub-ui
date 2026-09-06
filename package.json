@@ -44,5 +44,9 @@
     "vitest": "^2.0.0",
     "vue": "^3.4.0",
     "vue-tsc": "^2.0.0"
+  },
+  "dependencies": {
+    "marked": "^18.0.7",
+    "dompurify": "^3.4.12"
   }
 }
