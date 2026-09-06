@@ -13,5 +13,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PACKAGES_READ_TOKEN }}
       # typecheck 同时强制 PORTING.md 的「相对 import 必须带 .js 后缀」(NodeNext TS2835)
       - run: npm run typecheck && npm test && npm run build

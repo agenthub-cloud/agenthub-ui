@@ -17,6 +17,8 @@ jobs:
           scope: '@agenthub-cloud'
           cache: npm
       - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PACKAGES_READ_TOKEN }}
       - run: npm run typecheck && npm run test && npm run build
       - run: npm publish --access restricted
         env:
