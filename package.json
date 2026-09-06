@@ -12,7 +12,11 @@
       "default": "./dist/index.js"
     },
     "./tokens.scss": "./dist/tokens/ai-tokens.scss",
-    "./theme.css": "./dist/theme.css"
+    "./theme.css": "./dist/theme.css",
+    "./css": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.css"
+    }
   },
   "files": [
     "dist"
