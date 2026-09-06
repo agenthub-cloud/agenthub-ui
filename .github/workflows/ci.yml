@@ -11,6 +11,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@agenthub-cloud'
           cache: npm
       - run: npm ci
         env:
