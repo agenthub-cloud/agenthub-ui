@@ -33,6 +33,20 @@ describe('components SessionSidebar 合并冒烟(Task 5)', () => {
     expect(rail.findAll('.sidebar__rail-action').length).toBe(3) // 品牌/新对话/搜索
   })
 
+  it('showAccountFooter=false:只隐藏账户区,保留应用入口、项目和会话', () => {
+    const w = mount(SessionSidebar, { props: { ...baseProps, showAccountFooter: false } })
+    expect(w.find('.sidebar__foot').exists()).toBe(false)
+    expect(w.find('.sidebar__nav').exists()).toBe(true)
+    expect(w.find('.sidebar__projects').exists()).toBe(true)
+    expect(w.find('.sidebar__list').exists()).toBe(true)
+
+    const rail = mount(SessionSidebar, {
+      props: { ...baseProps, showAccountFooter: false, collapsed: true }
+    })
+    expect(rail.find('.sidebar__rail-action--profile').exists()).toBe(false)
+    expect(rail.findAll('.sidebar__rail-action').length).toBeGreaterThanOrEqual(5)
+  })
+
   it('项目菜单:••• 打开 Teleport 弹层,编辑/删除 emit 项目对象', async () => {
     const w = mount(SessionSidebar, { props: baseProps, attachTo: document.body })
     await w.find('.sidebar__project-more').trigger('click')

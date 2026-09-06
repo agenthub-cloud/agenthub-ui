@@ -17,7 +17,9 @@ const props = defineProps({
   expandedProjectIds: { type: Array, default: () => [] },
   // 桌面应用入口区块(rail/nav 上的 文件/知识库/资源库/偏好设置):桌面宿主默认展示,
   // extension/ruoyi 等无这些入口的场景传 false,四个 emit 随区块隐藏
-  showAppEntries: { type: Boolean, default: true }
+  showAppEntries: { type: Boolean, default: true },
+  // 宿主已经有全局账号菜单时可仅隐藏侧栏底部账户区；其它导航、项目和会话保持一致。
+  showAccountFooter: { type: Boolean, default: true }
 })
 
 const emit = defineEmits([
@@ -287,7 +289,7 @@ function handleMenuAction(action) {
         <div class="sidebar__rail-spacer"></div>
 
         <button
-          v-if="showAppEntries"
+          v-if="showAppEntries && showAccountFooter"
           type="button"
           class="sidebar__rail-action sidebar__rail-action--profile"
           data-tooltip="偏好设置"
@@ -497,7 +499,7 @@ function handleMenuAction(action) {
       </div>
 
       <!-- 左下角个人资料与弹窗菜单 (1:1 像素级还原参考图) -->
-      <div class="sidebar__foot" ref="userCardRef">
+      <div v-if="showAccountFooter" class="sidebar__foot" ref="userCardRef">
         <!-- 弹出的用户菜单 (1:1 像素级对齐参考图) -->
         <div v-if="userMenuOpen" class="sidebar__user-menu">
           <!-- 第一组：实际可用的设置(showAppEntries=false 时整组与随后的分隔线隐藏) -->
