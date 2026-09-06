@@ -1,10 +1,22 @@
-/**
- * 手写宽松类型声明:组件为 JS SFC,精确 props 类型化留后续阶段
- * (props 契约目前以 @agenthub-cloud/chat 的 TimelineTurn/Step 运行时形状为准)。
- */
-import type { DefineComponent } from 'vue'
+/** 公共声明与运行时导出保持一一对应；JS SFC 统一暴露为 Vue Component。 */
+import type { Component, ComputedRef, Ref } from 'vue'
 
-type Atom = DefineComponent<Record<string, any>, Record<string, any>, any>
+type Atom = Component
+type UiMethod = (...args: never[]) => unknown
+
+export interface UiBridge {
+  baseURL?: string
+  getToken?: () => string | null | undefined
+  request?: UiMethod
+  getToolResult?: UiMethod
+  getSpecialEvents?: UiMethod
+  getUser?: () => Record<string, unknown> | null | undefined
+  getSkills?: () => unknown[]
+  workspace?: Record<string, UiMethod>
+  userFile?: Record<string, UiMethod>
+  kb?: Record<string, UiMethod>
+  resources?: Record<string, UiMethod>
+}
 
 export declare const ChatBody: Atom
 export declare const ChatMessage: Atom
@@ -38,25 +50,25 @@ export declare const WorkspaceDrawer: Atom
 export declare const WorkspacePreviewModal: Atom
 export declare const SessionSidebar: Atom
 
-export declare function useScroll(...args: any[]): any
-export declare function useStepToggle(...args: any[]): any
-export declare function useToolImages(...args: any[]): any
-export declare function useToolVideos(...args: any[]): any
-export declare function useToolAudios(...args: any[]): any
-export declare function mergeWorkspaceChanges(...args: any[]): any
-export declare function collectFileChangesFromSteps(...args: any[]): any
-export declare function workspaceChangeCounts(...args: any[]): any
-export declare function confirmDanger(title: string, message: string, options?: Record<string, any>): Promise<boolean>
+export declare function useScroll(...args: unknown[]): unknown
+export declare function useStepToggle(...args: unknown[]): unknown
+export declare function useToolImages(...args: unknown[]): unknown
+export declare function useToolVideos(...args: unknown[]): unknown
+export declare function useToolAudios(...args: unknown[]): unknown
+export declare function mergeWorkspaceChanges(...args: unknown[]): unknown
+export declare function collectFileChangesFromSteps(...args: unknown[]): unknown
+export declare function workspaceChangeCounts(...args: unknown[]): unknown
+export declare function confirmDanger(title: string, message: string, options?: Record<string, unknown>): Promise<boolean>
 export declare function toast(message: string): void
-export declare const confirmState: Record<string, any>
+export declare const confirmState: Record<string, unknown>
 export declare function resolveConfirm(ok: boolean): void
-export declare function useDialogLifecycle(...args: any[]): any
-export declare function useTheme(): { mode: any; isDark: any; setMode: (m: string) => void; toggleTheme: () => void; initTheme: () => void }
+export declare function useDialogLifecycle(...args: unknown[]): unknown
+export declare function useTheme(): { mode: Ref<string>; isDark: ComputedRef<boolean>; setMode: (m: string) => void; toggleTheme: () => void; initTheme: () => void }
 export declare function paletteOf(key: string, theme?: number): { from: string; to: string; solid: string; soft: string }
 export declare function gradientOf(key: string, theme?: number): string
 export declare function colorOf(key: string, theme?: number): string
 export declare function softOf(key: string, theme?: number): string
 export declare function glowOf(key: string, theme?: number): string
 export declare const THEME_COUNT: number
-export declare function configureUiBridge(config: Record<string, any>): void
-export declare function getUiBridge(): Record<string, any> | null
+export declare function configureUiBridge(config: UiBridge): void
+export declare function getUiBridge(): UiBridge | null

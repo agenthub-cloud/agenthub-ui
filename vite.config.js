@@ -7,12 +7,15 @@ export default defineConfig({
   plugins: [vue()],
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.js'),
+      entry: {
+        index: path.resolve(__dirname, 'src/index.js'),
+        pages: path.resolve(__dirname, 'src/pages.js')
+      },
       formats: ['es'],
-      fileName: () => 'index.js'
+      fileName: (_format, entryName) => `${entryName}.js`
     },
     rollupOptions: {
-      external: ['vue', '@agenthub-cloud/chat'],
+      external: ['vue', '@agenthub-cloud/chat', '3d-force-graph', 'three-spritetext'],
       output: {
         preserveModules: false,
         assetFileNames: assetInfo => (assetInfo.name?.endsWith('.css') ? 'index.css' : assetInfo.name)
