@@ -35,10 +35,16 @@ export function getUiBridge() {
 export function requestWorkspaceBlob(path) {
   if (!bridge?.request || !bridge?.baseURL) return null
   const headers = bridge.getToken ? { Authorization: 'Bearer ' + bridge.getToken() } : {}
-  return bridge.request({
+  return Promise.resolve(bridge.request({
     method: 'get',
     url: bridge.baseURL + path,
     responseType: 'blob',
     headers
+  })).then((response) => {
+    // 宿主的 axios 封装并不一致：若依/desktop/插件会直接返回 Blob，
+    // 原生 axios 则返回 { data: Blob }。富媒体组件统一消费 data 字段，
+    // 在桥接处归一化，避免图片、视频、音频拿到 undefined 后渲染成破损资源。
+    if (response == null) return response
+    return typeof response === 'object' && 'data' in response ? response : { data: response }
   })
 }
