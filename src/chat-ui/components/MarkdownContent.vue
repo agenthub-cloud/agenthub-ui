@@ -94,7 +94,8 @@ function ensureImage(path) {
       const res = await requestWorkspaceBlob(
         '/ai/chat/workspace/' + encodeURIComponent(sid) + '/download?path=' + encodeURIComponent(path)
       )
-      const data = res && res.data
+      if (!res) throw new Error('宿主未配置工作区下载')
+      const data = res.data
       if (!data) throw new Error('工作区未返回内容')
       const blob = data instanceof Blob ? data : new Blob([data])
       // 404/403 时后端返回 JSON 错误体,被 responseType=blob 包成 application/json。
@@ -178,6 +179,11 @@ md.use({
       const alt = escapeAttr(text || '')
       const titleAttr = title ? ` title="${escapeAttr(title)}"` : ''
       if (!isWorkspacePath(href)) {
+        return `<img class="md-image" src="${escapeAttr(href)}" alt="${alt}"${titleAttr}>`
+      }
+      // 没有会话上下文(如知识库引用预览)时退回旧的相对地址行为,
+      // 不把「取不到工作区」变成一条失败提示
+      if (!sessionId.value) {
         return `<img class="md-image" src="${escapeAttr(href)}" alt="${alt}"${titleAttr}>`
       }
       const path = normalizeWorkspacePath(href)

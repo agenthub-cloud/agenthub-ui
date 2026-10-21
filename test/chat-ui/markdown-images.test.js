@@ -93,7 +93,7 @@ describe('MarkdownContent 工作区图片', () => {
     expect(wrapper.find('img.md-image').exists()).toBe(false)
   })
 
-  it('缺少会话 ID 时不做请求，保留占位', async () => {
+  it('没有会话上下文时退回普通相对地址，不发工作区请求', async () => {
     const request = vi.fn()
     configureUiBridge({ baseURL: '/api', request })
 
@@ -103,6 +103,6 @@ describe('MarkdownContent 工作区图片', () => {
     await flush()
 
     expect(request).not.toHaveBeenCalled()
-    expect(wrapper.find('.md-image-slot.is-error').text()).toContain('缺少会话信息')
+    expect(wrapper.find('img.md-image').attributes('src')).toBe('outputs/x.png')
   })
 })
