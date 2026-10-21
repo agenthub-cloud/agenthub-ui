@@ -38,7 +38,7 @@
 
       <!-- 正文(最终回答):不套气泡,直接铺开 -->
       <div v-if="contentStep" class="chat-msg__answer">
-        <MarkdownContent :text="contentStep.text" />
+        <MarkdownContent :text="contentStep.text" :session-id="sessionId" />
         <span v-if="contentStep.streaming || (isStreaming && !turn.completed)" class="chat-typing-cursor"></span>
       </div>
 

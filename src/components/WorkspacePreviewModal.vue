@@ -46,7 +46,7 @@
           <div v-else-if="binary" class="ws-preview-modal__hint">二进制文件，不支持预览 (可点击右上角下载)</div>
           <div v-else-if="tooLarge" class="ws-preview-modal__hint">文件超过 200KB，不支持预览 (可点击右上角下载)</div>
           <div v-else-if="isMarkdownFile" class="ws-preview-modal__md">
-            <MarkdownContent :text="content" />
+            <MarkdownContent :text="content" :session-id="sessionId" />
           </div>
           <pre v-else class="ws-preview-modal__code">{{ content }}</pre>
         </main>
