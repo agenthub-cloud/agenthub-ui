@@ -59,9 +59,30 @@
       </div>
 
       <!-- 失败/取消/节点中断属于持久化运行终态，不能继续显示“处理中”。 -->
-      <div v-if="turn.terminalMessage" class="chat-msg__terminal" :class="`is-${String(turn.runStatus || '').toLowerCase()}`">
+      <div
+        v-if="turn.terminalMessage"
+        class="chat-msg__terminal"
+        :class="`is-${String(turn.runStatus || '').toLowerCase()}`"
+        :title="turn.terminalMessage"
+      >
+        <svg v-if="turn.runStatus === 'CANCELLED'" class="chat-msg__terminal-icon" width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <rect x="2.2" y="2.2" width="7.6" height="7.6" rx="1.6" fill="currentColor"/>
+        </svg>
+        <svg v-else-if="turn.runStatus === 'INTERRUPTED'" class="chat-msg__terminal-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <circle cx="6" cy="6" r="4.6" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M6 3.6v2.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="6" cy="8.4" r="0.7" fill="currentColor"/>
+        </svg>
+        <svg v-else class="chat-msg__terminal-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <circle cx="6" cy="6" r="4.6" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M6 3.6v2.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="6" cy="8.4" r="0.7" fill="currentColor"/>
+        </svg>
         <span class="chat-msg__terminal-title">{{ terminalTitle }}</span>
-        <span class="chat-msg__terminal-text">{{ turn.terminalMessage }}</span>
+        <template v-if="terminalText">
+          <span class="chat-msg__terminal-sep" aria-hidden="true">·</span>
+          <span class="chat-msg__terminal-text">{{ terminalText }}</span>
+        </template>
       </div>
 
       <!-- 工具产出图片(生图等) -->
@@ -251,6 +272,17 @@ const terminalTitle = computed(() => {
   return '执行失败'
 })
 
+/**
+ * 取消态的 terminalMessage 通常就是「运行已取消」,与标题重复;
+ * 这种冗余不占行,完整原文放在 title 里。失败/中断仍保留原因。
+ */
+const terminalText = computed(() => {
+  const message = String(props.turn.terminalMessage || '').trim()
+  if (!message) return ''
+  if (props.turn.runStatus === 'CANCELLED' && /^(运行)?已取消/.test(message)) return ''
+  return message
+})
+
 const usageTitle = computed(() => {
   const u = props.turn.usage
   if (!u) return ''
@@ -384,18 +416,22 @@ async function copyContent() {
   &__content :deep(.tool-audios) { padding-top: 6px; }
 
   &__terminal {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 13px;
-    background: var(--danger-weak);
-    border: 1px solid rgba(239, 68, 68, 0.25);
-    color: var(--danger-text);
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 6px;
+    width: fit-content;
+    max-width: 100%;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    background: var(--ai-fill-1);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
 
     &.is-cancelled {
-      background: var(--ai-fill-2);
+      background: var(--ai-fill-1);
       border-color: var(--border);
       color: var(--text-tertiary);
     }
@@ -404,8 +440,17 @@ async function copyContent() {
       border-color: rgba(245, 158, 11, 0.25);
       color: var(--warn-text);
     }
-    &-title { font-weight: 600; }
-    &-text { line-height: 1.5; word-break: break-word; }
+    &.is-failed {
+      align-items: flex-start;
+      padding: 8px 12px;
+      background: var(--danger-weak);
+      border-color: rgba(239, 68, 68, 0.25);
+      color: var(--danger-text);
+    }
+    &-icon { flex: 0 0 auto; margin-top: 1px; }
+    &-title { font-weight: 600; white-space: nowrap; }
+    &-sep { opacity: 0.45; }
+    &-text { min-width: 0; line-height: 1.45; word-break: break-word; }
   }
 
   &__side {
