@@ -106,6 +106,9 @@ function dayKey(ts) {
 }
 
 function showDateDivider(t, i) {
+  // 没有可用时间戳的首轮(应用助手会话常见)不要画分隔条:
+  // dateLabel 会返回空串,留下一个没有文字的空胶囊,看起来像一条无意义的灰条。
+  if (!dateLabel(t)) return false
   if (i === 0) return true
   const cur = dayKey(turnTime(t))
   if (cur == null) return false
